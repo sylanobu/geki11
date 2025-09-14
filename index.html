@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S特寸劇 公式サイト | 劇なのか事故なのか</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color-start: #ff7eaf;
+            --primary-color-end: #ff6b9d;
+            --text-color-dark: #2c3e50;
+            --text-color-light: #5a6a7a;
+            --background-light: #fdfcff;
+            --background-alt: #f8f9fa;
+            --border-color: #e9ecef;
+            --white-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --shadow-hover-color: rgba(0, 0, 0, 0.12);
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            line-height: 1.7;
+            color: var(--text-color-dark);
+            background: var(--background-light);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Navigation */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-container.scrolled {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.07);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .nav-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 48px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color-dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+            padding: 4px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color-end);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 24px 120px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background-color: #fff0f5;
+            background-image:
+                radial-gradient(circle at 1% 1%, hsla(330, 90%, 95%, 1) 0.5px, transparent 0),
+                radial-gradient(circle at 99% 99%, hsla(330, 90%, 95%, 1) 0.5px, transparent 0);
+            background-size: 30px 30px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 16px;
+            letter-spacing: -0.04em;
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            margin-bottom: 48px;
+            color: var(--text-color-light);
+            font-weight: 500;
+        }
+
+        .hero-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 60px;
+        }
+
+        .hero-info-item { text-align: center; }
+        .hero-info-item h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            color: var(--text-color-light);
+        }
+        .hero-info-item p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--white-color);
+            padding: 14px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+            margin-top: 24px;
+        }
+        .cta-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(255, 107, 157, 0.5);
+        }
+
+        /* General Section Styles */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section { padding: 100px 0; }
+        .section.alt { background: var(--background-alt); }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--text-color-dark);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 70px;
+            height: 4px;
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+            margin: 24px auto 0;
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-color-light);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .card {
+            background: var(--white-color);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 25px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px var(--shadow-hover-color);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color-end);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title::before {
+            content: attr(data-letter);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            color: var(--white-color) !important; /* ← ここが変更されました */
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+        }
+
+        .card-text {
+            color: var(--text-color-light);
+            flex-grow: 1;
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            background: var(--white-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 25px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--background-alt);
+            font-weight: 600;
+            color: var(--text-color-dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td { color: var(--text-color-light); }
+        td:first-child { font-weight: 500; color: var(--text-color-dark); }
+        tr:last-child td { border-bottom: none; }
+
+        tbody tr { transition: background-color 0.3s ease; }
+        tbody tr:hover { background-color: hsla(330, 100%, 95%, 0.5); }
+        
+        /* Pricing Section */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .pricing-item {
+            background: var(--white-color);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 4px 25px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .pricing-item:hover {
+             transform: scale(1.05);
+             box-shadow: 0 12px 40px var(--shadow-hover-color);
+             border-color: var(--primary-color-start);
+        }
+
+        .pricing-category {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
+            margin-bottom: 16px;
+        }
+
+        .pricing-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color-end);
+            margin-bottom: 10px;
+        }
+
+        /* Location Section */
+        .highlight-section {
+            background: linear-gradient(45deg, hsla(330, 100%, 97%, 1), hsla(340, 100%, 97%, 1));
+            padding: 100px 0;
+            text-align: center;
+        }
+        
+        .highlight-card {
+            background: var(--white-color);
+            border-radius: 24px;
+            padding: 60px 40px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.07);
+            max-width: 700px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 107, 157, 0.2);
+        }
+
+        .highlight-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color-dark);
+            margin-bottom: 24px;
+        }
+
+        .location-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color-end);
+            margin-bottom: 8px;
+        }
+
+        .sublocation {
+            color: var(--text-color-light);
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--text-color-dark);
+            color: #bdc3c7;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .footer .logo {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #ecf0f1, #bdc3c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+        
+        .footer p {
+            font-size: 0.9rem;
+        }
+
+        /* Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--text-color-dark);
+            cursor: pointer;
+            z-index: 1100;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100vh;
+                width: 70%;
+                max-width: 300px;
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 40px;
+                transform: translateX(100%);
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            }
+            .nav-links.active {
+                transform: translateX(0);
+            }
+            .nav-links a { font-size: 1.2rem; }
+
+            .mobile-menu-btn { display: block; }
+            .section-title { font-size: 2.2rem; }
+            .cards-grid { grid-template-columns: 1fr; gap: 30px; }
+            th, td { padding: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 0 16px; }
+            .hero { padding: 120px 16px 80px; }
+            .section { padding: 80px 0; }
+            .card, .highlight-card, .pricing-item { padding: 30px 24px; }
+            .section-header { margin-bottom: 60px; }
+            th, td { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-container">
+        <div class="nav-content">
+            <div class="logo">S特寸劇</div>
+            <ul class="nav-links">
+                <li><a href="#plays">演目</a></li>
+                <li><a href="#schedule">スケジュール</a></li>
+                <li><a href="#price">料金</a></li>
+                <li><a href="#location">場所</a></li>
+            </ul>
+            <button class="mobile-menu-btn">☰</button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="fade-in">S特寸劇</h1>
+                <p class="hero-subtitle fade-in" style="transition-delay: 0.1s;">劇なのか事故なのか</p>
+                <a href="#schedule" class="cta-button fade-in" style="transition-delay: 0.2s;">公演スケジュールを見る</a>
+                <div class="hero-info fade-in" style="transition-delay: 0.3s;">
+                    <div class="hero-info-item">
+                        <h3>場所</h3>
+                        <p>向上高校 3階 305教室</p>
+                    </div>
+                    <div class="hero-info-item">
+                        <h3>公演回数</h3>
+                        <p>全5回公演</p>
+                    </div>
+                    <div class="hero-info-item">
+                        <h3>観覧料</h3>
+                        <p>0円〜</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="plays" class="section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2 class="section-title">演目紹介</h2>
+                    <p class="section-subtitle">一回の公演で3つの物語が楽しめます。個性豊かな世界観をご堪能ください。</p>
+                </div>
+                
+                <div class="cards-grid">
+                    <div class="card fade-in">
+                        <h3 class="card-title" data-letter="A">星空の約束</h3>
+                        <p class="card-text">幼い頃の約束を胸に、再会を果たす二人。星空の下で交わされる想いは未来を変えていく――。感動のラブストーリー。</p>
+                    </div>
+                    
+                    <div class="card fade-in" style="transition-delay: 0.1s;">
+                        <h3 class="card-title" data-letter="B">お返しはマシュマロ</h3>
+                        <p class="card-text">完璧な生徒会長・遠坂拓也は、バレンタインに女子からたくさんチョコをもらう人気者。副会長の青野香奈子からも貰ったが、お返しとしてマシュマロを渡してしまい――。ドタバタ学園コメディ！</p>
+                    </div>
+                    
+                    <div class="card fade-in" style="transition-delay: 0.2s;">
+                        <h3 class="card-title" data-letter="C">時計仕掛けの夢</h3>
+                        <p class="card-text">止まった時間を動かすのは誰か――夢と現実が交差するファンタジー作品。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="schedule" class="section alt">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2 class="section-title">タイムスケジュール</h2>
+                </div>
+                
+                <div class="table-wrapper fade-in">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>公演</th>
+                                <th>開演時間</th>
+                                <th>終演予定</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>第1回（一日目）</td><td>10:50</td><td>11:30</td></tr>
+                            <tr><td>第2回（一日目）</td><td>12:40</td><td>13:20</td></tr>
+                            <tr><td>第3回（一日目）</td><td>14:20</td><td>15:00</td></tr>
+                            <tr><td>第4回（二日目）</td><td>10:50</td><td>11:30</td></tr>
+                            <tr><td>第5回（二日目）</td><td>12:30</td><td>13:10</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="price" class="section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2 class="section-title">料金案内</h2>
+                </div>
+                
+                <div class="pricing-grid fade-in">
+                    <div class="pricing-item">
+                        <div class="pricing-category">小学生以下</div>
+                        <div class="pricing-amount">無料</div>
+                    </div>
+                    <div class="pricing-item" style="transition-delay: 0.1s;">
+                        <div class="pricing-category">中高生</div>
+                        <div class="pricing-amount">100円</div>
+                    </div>
+                    <div class="pricing-item" style="transition-delay: 0.2s;">
+                        <div class="pricing-category">大学生以上</div>
+                        <div class="pricing-amount">200円</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="location" class="highlight-section">
+            <div class="container fade-in">
+                <div class="highlight-card">
+                    <h3>会場案内</h3>
+                    <div class="location-text">向上高校</div>
+                    <div class="location-text">3階 305教室</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="logo">S特寸劇</div>
+            <p>&copy; 2025 S特寸劇 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Navigation scroll effect
+            const nav = document.querySelector('.nav-container');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile menu functionality
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+            });
+            
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                     navLinks.classList.remove('active');
+                     mobileMenuBtn.textContent = '☰';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
