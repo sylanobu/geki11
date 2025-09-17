@@ -266,13 +266,15 @@
         }
 
         .card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color-end);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: flex-start;
-        }
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color-end);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    line-height: 1.4; /* 1行の高さを設定 */
+    height: 2.8em;  /* 1.4 × 2行 = 2.8em の高さを確保 */
+}
         
         .card-title::before {
             content: attr(data-letter);
