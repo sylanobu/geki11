@@ -304,7 +304,7 @@
             <section id="seats" class="section">
                 <div class="container">
                     <div class="section-header">
-                        <h2 class="section-title">座席の予約状況</h2>
+                        <h2 id="seat-status-title" class="section-title">座席の予約状況</h2>
                         <p class="section-subtitle">（○：空席　△：残りわずか　×：予約済み）</p>
                     </div>
                     <div class="seating-layout">
@@ -405,53 +405,91 @@
         modalBackdrop.addEventListener('click', closeModal);
         document.addEventListener('keydown', e => { if (e.key === "Escape" && modal.classList.contains('is-active')) closeModal(); });
 
-        // --- Google Sheet Seat Map Logic ---
+        // --- Google Sheet Seat Map Logic (Single URL Version) ---
         const fetchSeatsFromSheet = async () => {
             const seatGrid = document.getElementById('seat-grid');
             const standingArea = document.getElementById('standing-area');
-            if (!seatGrid || !standingArea) return;
+            const titleElement = document.getElementById('seat-status-title');
+            if (!seatGrid || !standingArea || !titleElement) return;
 
-            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1tzR9gEg7RejqtcFSICO6Uw4PgiRM-unxAyMg5Pa3SON0Onnz3Nlsdfu4ffrd_7PdOBzYv_mTDIHk/pub?output=csv';
+            /* ★★★★★ ご指定のURLを反映しました ★★★★★ */
+            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
 
+            // --- 公演スケジュール設定 ---
+            const performances = [
+                { name: '第1回', startTime: '9/27 10:50', endTime: '9/27 11:30', columnIndex: 1 },
+                { name: '第2回', startTime: '9/27 12:40', endTime: '9/27 13:20', columnIndex: 2 },
+                { name: '第3回', startTime: '9/27 14:20', endTime: '9/27 15:00', columnIndex: 3 },
+                { name: '第4回', startTime: '9/28 10:50', endTime: '9/28 11:30', columnIndex: 4 },
+                { name: '第5回', startTime: '9/28 12:30', endTime: '9/28 13:10', columnIndex: 5 },
+            ];
+
+            // --- 現在時刻に合わせて表示する公演を決定 ---
+            const now = new Date();
+            let targetPerformance = null;
+            const year = now.getFullYear(); // 現在の年を取得
+
+            for (const perf of performances) {
+                const start = new Date(`${year}/${perf.startTime}`);
+                const end = new Date(`${year}/${perf.endTime}`);
+                if (now >= start && now <= end) {
+                    targetPerformance = perf;
+                    break;
+                }
+            }
+            if (!targetPerformance) {
+                for (const perf of performances) {
+                    const start = new Date(`${year}/${perf.startTime}`);
+                    if (now < start) {
+                        targetPerformance = perf;
+                        break;
+                    }
+                }
+            }
+            if (!targetPerformance) {
+                targetPerformance = performances[performances.length - 1];
+            }
+            
+            // --- データの取得と描画 ---
             try {
+                titleElement.textContent = `${targetPerformance.name}公演 座席状況`;
+
                 const response = await fetch(sheetUrl);
                 if (!response.ok) throw new Error(`シートの取得に失敗`);
 
                 const csvText = await response.text();
-                const rows = csvText.split('\n');
-                rows.shift(); // ヘッダー行を除外
-
-                const standingRowData = rows.find(row => row.split(',')[0] === '立ち見');
-                const seatRowsData = rows.filter(row => row.split(',')[0] !== '立ち見');
+                const rows = csvText.split('\n').slice(1);
 
                 seatGrid.innerHTML = '';
                 standingArea.innerHTML = '';
-
-                seatRowsData.forEach(row => {
+                
+                rows.forEach(row => {
                     const columns = row.split(',');
-                    const seat = { id: columns[0], status: columns[1]?.trim() };
-                    if (!seat.id) return;
+                    const seatId = columns[0];
+                    const status = columns[targetPerformance.columnIndex]?.trim();
 
-                    const seatEl = document.createElement('div');
-                    seatEl.className = 'seat';
-                    if (seat.status === '○') seatEl.classList.add('is-available');
-                    else if (seat.status === '×') seatEl.classList.add('is-reserved');
-                    
-                    seatGrid.appendChild(seatEl);
+                    if (!seatId) return;
+
+                    if (seatId === '立ち見') {
+                        const standingBar = document.createElement('div');
+                        standingBar.className = 'standing-bar';
+                        standingBar.innerHTML = '<span>立ち見エリア</span>';
+
+                        if (status === '○') standingBar.classList.add('is-available');
+                        else if (status === '△') standingBar.classList.add('is-limited');
+                        else if (status === '×') standingBar.classList.add('is-reserved');
+                        
+                        standingArea.appendChild(standingBar);
+                    } else {
+                        const seatEl = document.createElement('div');
+                        seatEl.className = 'seat';
+
+                        if (status === '○') seatEl.classList.add('is-available');
+                        else if (status === '×') seatEl.classList.add('is-reserved');
+                        
+                        seatGrid.appendChild(seatEl);
+                    }
                 });
-
-                if (standingRowData) {
-                    const standingStatus = standingRowData.split(',')[1]?.trim();
-                    const standingBar = document.createElement('div');
-                    standingBar.className = 'standing-bar';
-                    standingBar.innerHTML = '<span>立ち見エリア</span>';
-
-                    if (standingStatus === '○') standingBar.classList.add('is-available');
-                    else if (standingStatus === '△') standingBar.classList.add('is-limited');
-                    else if (standingStatus === '×') standingBar.classList.add('is-reserved');
-
-                    standingArea.appendChild(standingBar);
-                }
 
             } catch (error) {
                 console.error('座席情報の取得エラー:', error);
