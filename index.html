@@ -357,171 +357,145 @@
     </div>
 
     <script>
-        gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger);
 
-        const body = document.body;
-        const isTouchDevice = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    // ... (ページ冒頭のアニメーション関連のコードはこのまま変更なし) ...
+    const body = document.body;
+    const isTouchDevice = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const numParticles = 100;
+    const resizeCanvas = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    class Particle {
+        constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.radius = Math.random() * 1.5; }
+        update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
+        draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(230, 143, 172, 0.5)'; ctx.fill(); }
+    }
+    const initParticles = () => { particles = []; for (let i = 0; i < numParticles; i++) { particles.push(new Particle()); } };
+    const animateParticles = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); };
+    resizeCanvas(); initParticles(); animateParticles();
+    window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+    gsap.to('.curtain-panel', { scaleX: 0, duration: 1.2, stagger: 0.1, ease: 'power3.inOut', onComplete: () => { document.querySelector('.curtain').style.display = 'none'; } });
+    const contentTL = gsap.timeline({ delay: 0.8 });
+    contentTL.to('body', { className: 'is-loaded' }).to('.hero h1', { y: 0, stagger: 0.1, duration: 1, ease: 'power3.out' }).from('.hero-subtitle, .scroll-indicator, .nav-container', { opacity: 0, y: 20, duration: 1, ease: 'power3.out' }, '-=0.7');
+    const sections = gsap.utils.toArray('.section-header, .plays-grid, .info-grid, .location-text, .seating-layout');
+    sections.forEach(section => { gsap.from(section, { opacity: 0, y: 50, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: section, start: 'top 85%' } }); });
+    ScrollTrigger.create({ start: "top top", end: 99999, onUpdate: self => { const nav = document.querySelector('.nav-container'); if (self.scroll() > 50) { nav.classList.add('scrolled'); } else { nav.classList.remove('scrolled'); } } });
+    const cards = gsap.utils.toArray('.play-card');
+    if (!isTouchDevice()) { cards.forEach(card => { const spotlight = card.querySelector('.spotlight'); card.addEventListener('mousemove', e => { const rect = card.getBoundingClientRect(); gsap.to(spotlight, { x: e.clientX - rect.left - rect.width/2, y: e.clientY - rect.top - rect.height/2, duration: 0.4, ease: 'power2.out' }); }); }); }
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSynopsis = document.getElementById('modal-synopsis');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalBackdrop = document.querySelector('.modal-backdrop');
+    const openModal = (title, synopsis) => { modalTitle.textContent = title; modalSynopsis.textContent = synopsis; modal.classList.add('is-active'); body.classList.add('modal-open'); };
+    const closeModal = () => { modal.classList.remove('is-active'); body.classList.remove('modal-open'); };
+    cards.forEach(card => { card.addEventListener('click', () => { openModal(card.dataset.title, card.dataset.synopsis); }); });
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => { if (e.key === "Escape" && modal.classList.contains('is-active')) closeModal(); });
 
-        // --- Particle Background ---
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        const numParticles = 100;
-        const resizeCanvas = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-        class Particle {
-            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.radius = Math.random() * 1.5; }
-            update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
-            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(230, 143, 172, 0.5)'; ctx.fill(); }
+    // --- ▼▼▼ ここから下が座席表のロジックです ▼▼▼ ---
+
+    const fetchSeatsFromSheet = async () => {
+        const seatGrid = document.getElementById('seat-grid');
+        const standingArea = document.getElementById('standing-area');
+        const titleElement = document.getElementById('seat-status-title');
+        if (!seatGrid || !standingArea || !titleElement) return;
+        
+        // キャッシュを確実に回避するため、URLの末尾に現在時刻を付与
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
+        const fetchUrl = `${sheetUrl}&t=${new Date().getTime()}`;
+
+        const performances = [
+            { name: '第1回', startTime: '9/27 10:50', endTime: '9/27 11:30', columnIndex: 1 },
+            { name: '第2回', startTime: '9/27 12:40', endTime: '9/27 13:20', columnIndex: 2 },
+            { name: '第3回', startTime: '9/27 14:20', endTime: '9/27 15:00', columnIndex: 3 },
+            { name: '第4回', startTime: '9/28 10:50', endTime: '9/28 11:30', columnIndex: 4 },
+            { name: '第5回', startTime: '9/28 12:30', endTime: '9/28 13:10', columnIndex: 5 },
+        ];
+
+        // --- 現在時刻に基づいて表示対象の公演を決定するロジック (変更なし) ---
+        const now = new Date();
+        let targetPerformance = null;
+        const year = now.getFullYear();
+        for (const perf of performances) {
+            const start = new Date(`${year}/${perf.startTime}`);
+            const end = new Date(`${year}/${perf.endTime}`);
+            if (now >= start && now <= end) { targetPerformance = perf; break; }
         }
-        const initParticles = () => { particles = []; for (let i = 0; i < numParticles; i++) { particles.push(new Particle()); } };
-        const animateParticles = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); };
-        resizeCanvas(); initParticles(); animateParticles();
-        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
-
-        // --- Curtain & Content Animation ---
-        gsap.to('.curtain-panel', { scaleX: 0, duration: 1.2, stagger: 0.1, ease: 'power3.inOut', onComplete: () => { document.querySelector('.curtain').style.display = 'none'; } });
-        const contentTL = gsap.timeline({ delay: 0.8 });
-        contentTL
-            .to('body', { className: 'is-loaded' })
-            .to('.hero h1', { y: 0, stagger: 0.1, duration: 1, ease: 'power3.out' })
-            .from('.hero-subtitle, .scroll-indicator, .nav-container', { opacity: 0, y: 20, duration: 1, ease: 'power3.out' }, '-=0.7');
-
-        // --- Scroll-triggered Animations ---
-        const sections = gsap.utils.toArray('.section-header, .plays-grid, .info-grid, .location-text, .seating-layout');
-        sections.forEach(section => {
-            gsap.from(section, { opacity: 0, y: 50, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: section, start: 'top 85%' } });
-        });
-        ScrollTrigger.create({
-            start: "top top", end: 99999,
-            onUpdate: self => {
-                const nav = document.querySelector('.nav-container');
-                if (self.scroll() > 50) { nav.classList.add('scrolled'); } 
-                else { nav.classList.remove('scrolled'); }
-            }
-        });
-
-        // --- Interactive Spotlight Effect ---
-        const cards = gsap.utils.toArray('.play-card');
-        if (!isTouchDevice()) {
-            cards.forEach(card => {
-                const spotlight = card.querySelector('.spotlight');
-                card.addEventListener('mousemove', e => {
-                    const rect = card.getBoundingClientRect();
-                    gsap.to(spotlight, { x: e.clientX - rect.left - rect.width/2, y: e.clientY - rect.top - rect.height/2, duration: 0.4, ease: 'power2.out' });
-                });
-            });
-        }
-
-        // --- Modal/Popup Logic ---
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalSynopsis = document.getElementById('modal-synopsis');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
-        const modalBackdrop = document.querySelector('.modal-backdrop');
-        const openModal = (title, synopsis) => { modalTitle.textContent = title; modalSynopsis.textContent = synopsis; modal.classList.add('is-active'); body.classList.add('modal-open'); };
-        const closeModal = () => { modal.classList.remove('is-active'); body.classList.remove('modal-open'); };
-        cards.forEach(card => { card.addEventListener('click', () => { openModal(card.dataset.title, card.dataset.synopsis); }); });
-        modalCloseBtn.addEventListener('click', closeModal);
-        modalBackdrop.addEventListener('click', closeModal);
-        document.addEventListener('keydown', e => { if (e.key === "Escape" && modal.classList.contains('is-active')) closeModal(); });
-
-        // --- Google Sheet Seat Map Logic ---
-        const fetchSeatsFromSheet = async () => {
-            const seatGrid = document.getElementById('seat-grid');
-            const standingArea = document.getElementById('standing-area');
-            const titleElement = document.getElementById('seat-status-title');
-            if (!seatGrid || !standingArea || !titleElement) return;
-            
-            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
-
-            const performances = [
-                { name: '第1回', startTime: '9/27 10:50', endTime: '9/27 11:30', columnIndex: 1 },
-                { name: '第2回', startTime: '9/27 12:40', endTime: '9/27 13:20', columnIndex: 2 },
-                { name: '第3回', startTime: '9/27 14:20', endTime: '9/27 15:00', columnIndex: 3 },
-                { name: '第4回', startTime: '9/28 10:50', endTime: '9/28 11:30', columnIndex: 4 },
-                { name: '第5回', startTime: '9/28 12:30', endTime: '9/28 13:10', columnIndex: 5 },
-            ];
-
-            const now = new Date();
-            let targetPerformance = null;
-            const year = now.getFullYear();
-
+        if (!targetPerformance) {
             for (const perf of performances) {
                 const start = new Date(`${year}/${perf.startTime}`);
-                const end = new Date(`${year}/${perf.endTime}`);
-                if (now >= start && now <= end) {
-                    targetPerformance = perf;
-                    break;
-                }
+                if (now < start) { targetPerformance = perf; break; }
             }
-            if (!targetPerformance) {
-                for (const perf of performances) {
-                    const start = new Date(`${year}/${perf.startTime}`);
-                    if (now < start) {
-                        targetPerformance = perf;
-                        break;
-                    }
-                }
-            }
-            if (!targetPerformance) {
-                targetPerformance = performances[performances.length - 1];
-            }
+        }
+        if (!targetPerformance) { targetPerformance = performances[performances.length - 1]; }
+        
+        console.log(`[デバッグ] 表示対象の公演: ${targetPerformance.name} (スプレッドシートの${targetPerformance.columnIndex + 1}列目を参照)`);
+
+        try {
+            titleElement.textContent = `${targetPerformance.name}公演 座席状況`;
+            const response = await fetch(fetchUrl);
+            if (!response.ok) throw new Error(`シートの取得に失敗しました。HTTPステータス: ${response.status}`);
+
+            const csvText = await response.text();
+            const rows = csvText.split('\n').slice(1);
+
+            seatGrid.innerHTML = '';
+            standingArea.innerHTML = '';
             
-            try {
-                titleElement.textContent = `${targetPerformance.name}公演 座席状況`;
-                const response = await fetch(sheetUrl);
-                if (!response.ok) throw new Error(`シートの取得に失敗`);
-
-                const csvText = await response.text();
-                const rows = csvText.split('\n').slice(1);
-
-                seatGrid.innerHTML = '';
-                standingArea.innerHTML = '';
+            rows.forEach((row, index) => {
+                // セル内の改行コード(\r)を削除してからカンマで分割
+                const columns = row.replace(/\r/g, '').split(',');
+                const seatId = columns[0]?.trim();
                 
-                rows.forEach(row => {
-                    const columns = row.split(',');
-                    const seatId = columns[0];
-                    const status = columns[targetPerformance.columnIndex]?.trim();
+                if (!seatId) return;
 
-                    if (!seatId) return;
+                // スプレッドシートから読み取ったステータス
+                const rawStatus = columns[targetPerformance.columnIndex];
+                // 前後の空白を完全に除去
+                const status = rawStatus ? rawStatus.trim() : ''; 
 
-                    if (seatId === '立ち見') {
-                        const standingBar = document.createElement('div');
-                        standingBar.className = 'standing-bar';
-                        
-                        const label = document.createElement('span');
-                        label.className = 'standing-bar-label';
-                        label.textContent = '立ち見エリア';
-                        
-                        const statusIcon = document.createElement('span');
-                        statusIcon.className = 'standing-bar-status';
+                // 【重要】デバッグ情報をコンソールに表示
+                console.log(`[デバッグ] ${index + 2}行目 (ID: ${seatId}) | 読み取ったステータス: "${status}"`);
 
-                        standingBar.appendChild(label);
-                        standingBar.appendChild(statusIcon);
-                        
-                        if (status === '○') standingBar.classList.add('is-available');
-                        else if (status === '△') standingBar.classList.add('is-limited');
-                        else if (status === '×') standingBar.classList.add('is-reserved');
-                        
-                        standingArea.appendChild(standingBar);
-                    } else {
-                        const seatEl = document.createElement('div');
-                        seatEl.className = 'seat';
+                if (seatId === 'spacer') {
+                    // 'spacer' の場合は通路用の空白要素を追加
+                    const spacer = document.createElement('div');
+                    seatGrid.appendChild(spacer);
+                } else if (seatId === '立ち見') {
+                    const standingBar = document.createElement('div');
+                    standingBar.className = 'standing-bar';
+                    standingBar.innerHTML = `<span class="standing-bar-label">立ち見エリア</span><span class="standing-bar-status"></span>`;
+                    
+                    if (status === '○') standingBar.classList.add('is-available');
+                    else if (status === '△') standingBar.classList.add('is-limited');
+                    else if (status === '×') standingBar.classList.add('is-reserved');
+                    
+                    standingArea.appendChild(standingBar);
+                } else {
+                    const seatEl = document.createElement('div');
+                    seatEl.className = 'seat';
 
-                        if (status === '○') seatEl.classList.add('is-available');
-                        else if (status === '×') seatEl.classList.add('is-reserved');
-                        
-                        seatGrid.appendChild(seatEl);
-                    }
-                });
+                    if (status === '○') seatEl.classList.add('is-available');
+                    else if (status === '△') seatEl.classList.add('is-limited');
+                    else if (status === '×') seatEl.classList.add('is-reserved');
+                    
+                    seatGrid.appendChild(seatEl);
+                }
+            });
 
-            } catch (error) {
-                console.error('座席情報の取得エラー:', error);
-                const container = document.querySelector('.seating-layout');
-                if(container) container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">座席情報の読み込みに失敗しました。</p>';
-            }
-        };
-        document.addEventListener('DOMContentLoaded', fetchSeatsFromSheet);
-    </script>
+        } catch (error) {
+            console.error('座席情報の取得でエラーが発生しました:', error);
+            document.querySelector('.seating-layout').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">座席情報の読み込みに失敗しました。ページを再読み込みしてください。</p>';
+        }
+    };
+
+    // ページの読み込みが完了したら座席情報を取得
+    document.addEventListener('DOMContentLoaded', fetchSeatsFromSheet);
+
+</script>
 </body>
 </html>
