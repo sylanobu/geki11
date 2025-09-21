@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S特寸劇 公式サイト</title>
+    <title>S特寸劇 公式サイト | Final Act</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-BL35KS8R1F');
     </script>
     
@@ -131,12 +130,84 @@
         .modal-close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 2rem; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
         .modal-close-btn:hover { color: var(--text-light); }
 
+        /* 座席表のデザイン */
+        .seating-layout {
+            max-width: 900px;
+            margin: 40px auto 0;
+            padding: 0 16px;
+        }
+        .stage {
+            width: 100%;
+            background: var(--background-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 12px 0;
+            margin-bottom: 32px;
+            font-family: var(--font-serif);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            border-radius: 4px;
+        }
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 8px;
+        }
+        .standing-area {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-color);
+        }
+        .seat {
+            aspect-ratio: 1 / 1;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            position: relative;
+        }
+        .standing-bar {
+            width: 100%;
+            background: var(--background-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-serif);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        .standing-bar::before {
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .seat::before, .standing-bar::before {
+            font-family: var(--font-serif);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .standing-bar::before {
+            position: static;
+            transform: none;
+        }
+        .is-available::before { content: '○'; color: var(--accent-pink); }
+        .is-limited::before { content: '△'; color: #e6c38f; }
+        .is-reserved { cursor: not-allowed; }
+        .is-reserved::before { content: '×'; color: var(--text-secondary); }
+        
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .info-grid { grid-template-columns: 1fr; gap: 60px; }
             .section { padding: 100px 0; }
             .footer { margin-top: 100px; }
             .play-card:hover .spotlight { opacity: 0; }
+            .seat-grid { gap: 4px; }
+            .standing-bar { font-size: 0.9rem; padding: 12px; }
+            .standing-bar::before { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -155,6 +226,7 @@
                 <ul class="nav-links">
                     <li><a href="#plays">演目</a></li>
                     <li><a href="#info">公演詳細</a></li>
+                    <li><a href="#seats">座席状況</a></li>
                     <li><a href="#location">場所</a></li>
                 </ul>
             </div>
@@ -228,6 +300,21 @@
                     </div>
                 </div>
             </section>
+
+            <section id="seats" class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">座席の予約状況</h2>
+                        <p class="section-subtitle">（○：空席　△：残りわずか　×：予約済み）</p>
+                    </div>
+                    <div class="seating-layout">
+                        <div class="stage">STAGE</div>
+                        <div id="seat-grid" class="seat-grid"></div>
+                        <div id="standing-area" class="standing-area"></div>
+                    </div>
+                </div>
+            </section>
+            
             <section id="location" class="section location-section">
                 <div class="container">
                     <div class="section-header"><h2 class="section-title">会場</h2></div>
@@ -255,82 +342,34 @@
         const body = document.body;
         const isTouchDevice = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
-        // --- 1. Particle Background ---
+        // --- Particle Background ---
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
         const numParticles = 100;
-
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-
+        const resizeCanvas = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
         class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.3;
-                this.vy = (Math.random() - 0.5) * 0.3;
-                this.radius = Math.random() * 1.5;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(230, 143, 172, 0.5)';
-                ctx.fill();
-            }
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.radius = Math.random() * 1.5; }
+            update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(230, 143, 172, 0.5)'; ctx.fill(); }
         }
+        const initParticles = () => { particles = []; for (let i = 0; i < numParticles; i++) { particles.push(new Particle()); } };
+        const animateParticles = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateParticles); };
+        resizeCanvas(); initParticles(); animateParticles();
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
 
-        const initParticles = () => {
-            particles = [];
-            for (let i = 0; i < numParticles; i++) {
-                particles.push(new Particle());
-            }
-        };
-
-        const animateParticles = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animateParticles);
-        };
-
-        resizeCanvas();
-        initParticles();
-        animateParticles();
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            initParticles();
-        });
-
-
-        // --- 2. Curtain & Content Animation ---
-        gsap.to('.curtain-panel', {
-            scaleX: 0, duration: 1.2, stagger: 0.1, ease: 'power3.inOut',
-            onComplete: () => { document.querySelector('.curtain').style.display = 'none'; }
-        });
+        // --- Curtain & Content Animation ---
+        gsap.to('.curtain-panel', { scaleX: 0, duration: 1.2, stagger: 0.1, ease: 'power3.inOut', onComplete: () => { document.querySelector('.curtain').style.display = 'none'; } });
         const contentTL = gsap.timeline({ delay: 0.8 });
         contentTL
             .to('body', { className: 'is-loaded' })
             .to('.hero h1', { y: 0, stagger: 0.1, duration: 1, ease: 'power3.out' })
             .from('.hero-subtitle, .scroll-indicator, .nav-container', { opacity: 0, y: 20, duration: 1, ease: 'power3.out' }, '-=0.7');
 
-        // --- 3. Scroll-triggered Animations ---
-        const sections = gsap.utils.toArray('.section-header, .plays-grid, .info-grid, .location-text');
+        // --- Scroll-triggered Animations ---
+        const sections = gsap.utils.toArray('.section-header, .plays-grid, .info-grid, .location-text, .seating-layout');
         sections.forEach(section => {
-            gsap.from(section, {
-                opacity: 0, y: 50, duration: 1.2, ease: 'power3.out',
-                scrollTrigger: { trigger: section, start: 'top 85%' }
-            });
+            gsap.from(section, { opacity: 0, y: 50, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: section, start: 'top 85%' } });
         });
         ScrollTrigger.create({
             start: "top top", end: 99999,
@@ -341,7 +380,7 @@
             }
         });
 
-        // --- 4. Interactive Spotlight Effect ---
+        // --- Interactive Spotlight Effect ---
         const cards = gsap.utils.toArray('.play-card');
         if (!isTouchDevice()) {
             cards.forEach(card => {
@@ -351,42 +390,76 @@
                     gsap.to(spotlight, { x: e.clientX - rect.left - rect.width/2, y: e.clientY - rect.top - rect.height/2, duration: 0.4, ease: 'power2.out' });
                 });
             });
-        } else {
-            cards.forEach(card => {
-                const spotlight = card.querySelector('.spotlight');
-                gsap.to(spotlight, { opacity: 0.5, duration: 1, ease: 'power2.out', scrollTrigger: { trigger: card, start: 'top 70%', end: 'bottom 30%', toggleActions: 'play reverse play reverse' } });
-            });
         }
 
-        // --- 5. Modal/Popup Logic ---
+        // --- Modal/Popup Logic ---
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
         const modalSynopsis = document.getElementById('modal-synopsis');
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const modalBackdrop = document.querySelector('.modal-backdrop');
-
-        const openModal = (title, synopsis) => {
-            modalTitle.textContent = title;
-            modalSynopsis.textContent = synopsis;
-            modal.classList.add('is-active');
-            body.classList.add('modal-open');
-        };
-        const closeModal = () => {
-            modal.classList.remove('is-active');
-            body.classList.remove('modal-open');
-        };
-
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                openModal(card.dataset.title, card.dataset.synopsis);
-            });
-        });
-
+        const openModal = (title, synopsis) => { modalTitle.textContent = title; modalSynopsis.textContent = synopsis; modal.classList.add('is-active'); body.classList.add('modal-open'); };
+        const closeModal = () => { modal.classList.remove('is-active'); body.classList.remove('modal-open'); };
+        cards.forEach(card => { card.addEventListener('click', () => { openModal(card.dataset.title, card.dataset.synopsis); }); });
         modalCloseBtn.addEventListener('click', closeModal);
         modalBackdrop.addEventListener('click', closeModal);
-        document.addEventListener('keydown', e => {
-            if (e.key === "Escape" && modal.classList.contains('is-active')) closeModal();
-        });
+        document.addEventListener('keydown', e => { if (e.key === "Escape" && modal.classList.contains('is-active')) closeModal(); });
+
+        // --- Google Sheet Seat Map Logic ---
+        const fetchSeatsFromSheet = async () => {
+            const seatGrid = document.getElementById('seat-grid');
+            const standingArea = document.getElementById('standing-area');
+            if (!seatGrid || !standingArea) return;
+
+            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1tzR9gEg7RejqtcFSICO6Uw4PgiRM-unxAyMg5Pa3SON0Onnz3Nlsdfu4ffrd_7PdOBzYv_mTDIHk/pub?output=csv';
+
+            try {
+                const response = await fetch(sheetUrl);
+                if (!response.ok) throw new Error(`シートの取得に失敗`);
+
+                const csvText = await response.text();
+                const rows = csvText.split('\n');
+                rows.shift(); // ヘッダー行を除外
+
+                const standingRowData = rows.find(row => row.split(',')[0] === '立ち見');
+                const seatRowsData = rows.filter(row => row.split(',')[0] !== '立ち見');
+
+                seatGrid.innerHTML = '';
+                standingArea.innerHTML = '';
+
+                seatRowsData.forEach(row => {
+                    const columns = row.split(',');
+                    const seat = { id: columns[0], status: columns[1]?.trim() };
+                    if (!seat.id) return;
+
+                    const seatEl = document.createElement('div');
+                    seatEl.className = 'seat';
+                    if (seat.status === '○') seatEl.classList.add('is-available');
+                    else if (seat.status === '×') seatEl.classList.add('is-reserved');
+                    
+                    seatGrid.appendChild(seatEl);
+                });
+
+                if (standingRowData) {
+                    const standingStatus = standingRowData.split(',')[1]?.trim();
+                    const standingBar = document.createElement('div');
+                    standingBar.className = 'standing-bar';
+                    standingBar.innerHTML = '<span>立ち見エリア</span>';
+
+                    if (standingStatus === '○') standingBar.classList.add('is-available');
+                    else if (standingStatus === '△') standingBar.classList.add('is-limited');
+                    else if (standingStatus === '×') standingBar.classList.add('is-reserved');
+
+                    standingArea.appendChild(standingBar);
+                }
+
+            } catch (error) {
+                console.error('座席情報の取得エラー:', error);
+                const container = document.querySelector('.seating-layout');
+                if(container) container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">座席情報の読み込みに失敗しました。</p>';
+            }
+        };
+        document.addEventListener('DOMContentLoaded', fetchSeatsFromSheet);
     </script>
 </body>
 </html>
