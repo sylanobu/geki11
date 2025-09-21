@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S特寸劇 公式サイト | Final Act</title>
+    <title>S特寸劇 | 劇なのか事故なのか</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,10 +65,62 @@
         .nav-container { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 24px 0; transition: background-color 0.4s ease, border-color 0.4s ease; border-bottom: 1px solid transparent; }
         .nav-container.scrolled { background-color: rgba(26, 17, 24, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
         .nav-content { display: flex; align-items: center; justify-content: space-between; }
-        .logo { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 800; color: var(--text-light); }
+        
+        /* ▼変更▼ ロゴをクリック可能にし、下線を消す */
+        .logo { 
+            font-family: var(--font-serif); 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: var(--text-light); 
+            text-decoration: none; 
+        }
+        
         .nav-links { display: flex; list-style: none; gap: 40px; }
-        .nav-links a { text-decoration: none; color: var(--text-light); font-weight: 500; transition: color 0.3s ease; font-size: 0.9rem; }
+        
+        /* ▼変更▼ ナビゲーションリンクを明朝体にする */
+        .nav-links a { 
+            text-decoration: none; 
+            color: var(--text-light); 
+            font-family: var(--font-serif);
+            font-weight: 600; 
+            transition: color 0.3s ease; 
+            font-size: 0.9rem; 
+        }
         .nav-links a:hover { color: var(--accent-pink); }
+
+        .hamburger-btn {
+            display: none;
+            position: relative;
+            z-index: 1100;
+            width: 30px;
+            height: 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        .hamburger-btn span {
+            display: block;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-light);
+            transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease;
+            border-radius: 2px;
+        }
+        .hamburger-btn span:nth-child(1) { top: 0; }
+        .hamburger-btn span:nth-child(2) { top: 11px; }
+        .hamburger-btn span:nth-child(3) { top: 22px; }
+        .hamburger-btn.is-active span:nth-child(1) {
+            top: 11px;
+            transform: rotate(45deg);
+        }
+        .hamburger-btn.is-active span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.is-active span:nth-child(3) {
+            top: 11px;
+            transform: rotate(-45deg);
+        }
 
         .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .hero-title-line { overflow: hidden; padding: 0 0.5em; }
@@ -129,8 +181,6 @@
         .modal-synopsis { color: var(--text-secondary); line-height: 1.8; }
         .modal-close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 2rem; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
         .modal-close-btn:hover { color: var(--text-light); }
-
-        /* ========== ▼ここから座席表のデザイン(変更後)▼ ========== */
         .seating-layout {
             max-width: 900px;
             margin: 40px auto 0;
@@ -166,7 +216,6 @@
             position: relative;
         }
         
-        /* 立ち見エリアのデザインを変更 */
         .standing-bar {
             width: 100%;
             background: transparent;
@@ -186,16 +235,12 @@
             display: flex;
             align-items: center;
         }
-
-        /* 立ち見エリアのラベルの隣に表示するアイコンのスタイル */
         .standing-bar-label::after {
             font-family: var(--font-serif);
             font-size: 1.5rem;
             line-height: 1;
             margin-left: 12px;
         }
-
-        /* 予約状況アイコン */
         .seat::before {
             font-family: var(--font-serif);
             font-size: 1.5rem;
@@ -205,7 +250,6 @@
             transform: translate(-50%, -50%);
         }
         
-        /* ステータスごとのスタイル */
         .is-available .standing-bar-label::after, .is-available.seat::before {
             content: '○';
             color: var(--accent-pink);
@@ -223,7 +267,46 @@
         }
         
         @media (max-width: 768px) {
-            .nav-links { display: none; }
+            .hamburger-btn {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: var(--background-dark);
+                z-index: 1050;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 32px;
+                visibility: hidden;
+                opacity: 0;
+                transition: opacity 0.4s ease, visibility 0s 0.4s;
+            }
+
+            .nav-links.is-open {
+                visibility: visible;
+                opacity: 1;
+                transition: opacity 0.4s ease;
+            }
+
+            .nav-links a {
+                font-size: 1.5rem;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.4s ease, transform 0.4s ease;
+            }
+            
+            .nav-links.is-open a {
+                opacity: 1;
+                transform: translateY(0);
+                transition-delay: 0.3s;
+            }
+
             .info-grid { grid-template-columns: 1fr; gap: 60px; }
             .section { padding: 100px 0; }
             .footer { margin-top: 100px; }
@@ -231,8 +314,16 @@
             .seat-grid { gap: 4px; }
             .standing-bar { padding: 16px; gap: 8px; }
             .standing-bar-label { font-size: 0.9rem; }
+
+            /* ▼追加▼ スマホ表示で座席記号を小さくする */
+            .seat::before,
+            .standing-bar-label::after {
+                font-size: 1.1rem;
+            }
+            .standing-bar-label::after {
+                margin-left: 8px;
+            }
         }
-        /* ========== ▲ここまで座席表のデザイン▲ ========== */
     </style>
 </head>
 <body>
@@ -246,7 +337,14 @@
     <div class="site-content">
         <nav class="nav-container">
             <div class="container nav-content">
-                <div class="logo">S特寸劇</div>
+                <a href="#" class="logo">S特寸劇</a>
+                
+                <button class="hamburger-btn" aria-label="メニューを開く" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
                 <ul class="nav-links">
                     <li><a href="#plays">演目</a></li>
                     <li><a href="#info">公演詳細</a></li>
@@ -363,7 +461,6 @@
     <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // ... (ページ冒頭のアニメーション関連のコードはこのまま変更なし) ...
     const body = document.body;
     const isTouchDevice = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const canvas = document.getElementById('particle-canvas');
@@ -400,7 +497,31 @@
     modalBackdrop.addEventListener('click', closeModal);
     document.addEventListener('keydown', e => { if (e.key === "Escape" && modal.classList.contains('is-active')) closeModal(); });
 
-    // --- ▼▼▼ ここから下が座席表のロジックです ▼▼▼ ---
+    const hamburgerBtn = document.querySelector('.hamburger-btn');
+    const navLinks = document.querySelector('.nav-links');
+    const navLinksAnchors = document.querySelectorAll('.nav-links a');
+
+    if (hamburgerBtn && navLinks) {
+        const toggleMenu = (force) => {
+            const isOpen = typeof force === 'boolean' ? force : !navLinks.classList.contains('is-open');
+            
+            hamburgerBtn.classList.toggle('is-active', isOpen);
+            navLinks.classList.toggle('is-open', isOpen);
+            document.body.classList.toggle('modal-open', isOpen);
+            hamburgerBtn.setAttribute('aria-expanded', isOpen);
+            hamburgerBtn.setAttribute('aria-label', isOpen ? 'メニューを閉じる' : 'メニューを開く');
+        };
+
+        hamburgerBtn.addEventListener('click', () => toggleMenu());
+
+        navLinksAnchors.forEach(anchor => {
+            anchor.addEventListener('click', () => {
+                if (navLinks.classList.contains('is-open')) {
+                    toggleMenu(false);
+                }
+            });
+        });
+    }
 
     const fetchSeatsFromSheet = async () => {
         const seatGrid = document.getElementById('seat-grid');
@@ -408,7 +529,6 @@
         const titleElement = document.getElementById('seat-status-title');
         if (!seatGrid || !standingArea || !titleElement) return;
         
-        // キャッシュを確実に回避するため、URLの末尾に現在時刻を付与
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
         const fetchUrl = `${sheetUrl}&t=${new Date().getTime()}`;
 
@@ -420,7 +540,6 @@
             { name: '第5回', startTime: '9/28 12:30', endTime: '9/28 13:10', columnIndex: 5 },
         ];
 
-        // --- 現在時刻に基づいて表示対象の公演を決定するロジック (変更なし) ---
         const now = new Date();
         let targetPerformance = null;
         const year = now.getFullYear();
@@ -464,9 +583,6 @@
                     const standingBar = document.createElement('div');
                     standingBar.className = 'standing-bar';
                     
-                    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-                    // ★ 修正点：不要なspanを削除し、ラベルのみにする
-                    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
                     standingBar.innerHTML = `<span class="standing-bar-label">立ち見エリア</span>`;
                     
                     if (status.includes('○')) standingBar.classList.add('is-available');
@@ -491,8 +607,6 @@
             document.querySelector('.seating-layout').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">座席情報の読み込みに失敗しました。ページを再読み込みしてください。</p>';
         }
     };
-
-    // ページの読み込みが完了したら座席情報を取得
     document.addEventListener('DOMContentLoaded', fetchSeatsFromSheet);
 
 </script>
