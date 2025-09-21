@@ -165,6 +165,7 @@
             border-radius: 4px;
             position: relative;
         }
+        
         /* 立ち見エリアのデザインを変更 */
         .standing-bar {
             width: 100%;
@@ -173,7 +174,6 @@
             border-radius: 8px;
             padding: 24px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 12px;
@@ -183,11 +183,16 @@
             font-weight: 600;
             color: var(--text-secondary);
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
         }
-        .standing-bar-status {
+
+        /* 立ち見エリアのラベルの隣に表示するアイコンのスタイル */
+        .standing-bar-label::after {
             font-family: var(--font-serif);
-            font-size: 2.5rem;
+            font-size: 1.5rem;
             line-height: 1;
+            margin-left: 12px;
         }
 
         /* 予約状況アイコン */
@@ -201,18 +206,18 @@
         }
         
         /* ステータスごとのスタイル */
-        .is-available .standing-bar-status, .is-available.seat::before {
+        .is-available .standing-bar-label::after, .is-available.seat::before {
             content: '○';
             color: var(--accent-pink);
         }
-        .is-limited .standing-bar-status, .is-limited.seat::before {
+        .is-limited .standing-bar-label::after, .is-limited.seat::before {
             content: '△';
             color: #e6c38f;
         }
         .is-reserved { 
             cursor: not-allowed; 
         }
-        .is-reserved .standing-bar-status, .is-reserved.seat::before {
+        .is-reserved .standing-bar-label::after, .is-reserved.seat::before {
             content: '×';
             color: var(--text-secondary);
         }
@@ -226,7 +231,6 @@
             .seat-grid { gap: 4px; }
             .standing-bar { padding: 16px; gap: 8px; }
             .standing-bar-label { font-size: 0.9rem; }
-            .standing-bar-status { font-size: 2rem; }
         }
         /* ========== ▲ここまで座席表のデザイン▲ ========== */
     </style>
@@ -433,8 +437,6 @@
         }
         if (!targetPerformance) { targetPerformance = performances[performances.length - 1]; }
         
-        console.log(`[デバッグ] 表示対象の公演: ${targetPerformance.name} (スプレッドシートの${targetPerformance.columnIndex + 1}列目を参照)`);
-
         try {
             titleElement.textContent = `${targetPerformance.name}公演 座席状況`;
             const response = await fetch(fetchUrl);
@@ -447,41 +449,38 @@
             standingArea.innerHTML = '';
             
             rows.forEach((row, index) => {
-                // セル内の改行コード(\r)を削除してからカンマで分割
                 const columns = row.replace(/\r/g, '').split(',');
                 const seatId = columns[0]?.trim();
                 
                 if (!seatId) return;
 
-                // スプレッドシートから読み取ったステータス
                 const rawStatus = columns[targetPerformance.columnIndex];
-                // 前後の空白を完全に除去
                 const status = rawStatus ? rawStatus.trim() : ''; 
 
-                // 【重要】デバッグ情報をコンソールに表示
-                console.log(`[デバッグ] ${index + 2}行目 (ID: ${seatId}) | 読み取ったステータス: "${status}"`);
-
                 if (seatId === 'spacer') {
-                    // 'spacer' の場合は通路用の空白要素を追加
                     const spacer = document.createElement('div');
                     seatGrid.appendChild(spacer);
                 } else if (seatId === '立ち見') {
                     const standingBar = document.createElement('div');
                     standingBar.className = 'standing-bar';
-                    standingBar.innerHTML = `<span class="standing-bar-label">立ち見エリア</span><span class="standing-bar-status"></span>`;
                     
-                    if (status === '○') standingBar.classList.add('is-available');
-                    else if (status === '△') standingBar.classList.add('is-limited');
-                    else if (status === '×') standingBar.classList.add('is-reserved');
+                    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+                    // ★ 修正点：不要なspanを削除し、ラベルのみにする
+                    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+                    standingBar.innerHTML = `<span class="standing-bar-label">立ち見エリア</span>`;
+                    
+                    if (status.includes('○')) standingBar.classList.add('is-available');
+                    else if (status.includes('△')) standingBar.classList.add('is-limited');
+                    else if (status.includes('×')) standingBar.classList.add('is-reserved');
                     
                     standingArea.appendChild(standingBar);
                 } else {
                     const seatEl = document.createElement('div');
                     seatEl.className = 'seat';
 
-                    if (status === '○') seatEl.classList.add('is-available');
-                    else if (status === '△') seatEl.classList.add('is-limited');
-                    else if (status === '×') seatEl.classList.add('is-reserved');
+                    if (status.includes('○')) seatEl.classList.add('is-available');
+                    else if (status.includes('△')) seatEl.classList.add('is-limited');
+                    else if (status.includes('×')) seatEl.classList.add('is-reserved');
                     
                     seatGrid.appendChild(seatEl);
                 }
