@@ -66,7 +66,6 @@
         .nav-container.scrolled { background-color: rgba(26, 17, 24, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
         .nav-content { display: flex; align-items: center; justify-content: space-between; }
         
-        /* ▼変更▼ ロゴをクリック可能にし、下線を消す */
         .logo { 
             font-family: var(--font-serif); 
             font-size: 1.8rem; 
@@ -77,7 +76,6 @@
         
         .nav-links { display: flex; list-style: none; gap: 40px; }
         
-        /* ▼変更▼ ナビゲーションリンクを明朝体にする */
         .nav-links a { 
             text-decoration: none; 
             color: var(--text-light); 
@@ -266,6 +264,28 @@
             color: var(--text-secondary);
         }
         
+        /* ▼▼▼ ローディング表示のスタイルを追加 ▼▼▼ */
+        .loader-container {
+            padding: 60px 0;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-color);
+            border-bottom-color: var(--accent-pink);
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* ▲▲▲ ローディング表示のスタイルを追加 ▲▲▲ */
+
         @media (max-width: 768px) {
             .hamburger-btn {
                 display: block;
@@ -315,7 +335,6 @@
             .standing-bar { padding: 16px; gap: 8px; }
             .standing-bar-label { font-size: 0.9rem; }
 
-            /* ▼追加▼ スマホ表示で座席記号を小さくする */
             .seat::before,
             .standing-bar-label::after {
                 font-size: 1.1rem;
@@ -430,7 +449,11 @@
                         <p class="section-subtitle">座席は指定席です。（○：空席　△：残りわずか　×：予約済み）</p>
                     </div>
                     <div class="seating-layout">
-                        <div class="stage">STAGE</div>
+                        <div id="loader-container" class="loader-container">
+                            <div class="loader"></div>
+                            <p>最新の座席情報を読み込んでいます...</p>
+                        </div>
+                        <div class="stage" style="display: none;">STAGE</div>
                         <div id="seat-grid" class="seat-grid"></div>
                         <div id="standing-area" class="standing-area"></div>
                     </div>
@@ -523,11 +546,17 @@
         });
     }
 
+    /* ▼▼▼ 座席取得の関数を大幅に変更 ▼▼▼ */
     const fetchSeatsFromSheet = async () => {
         const seatGrid = document.getElementById('seat-grid');
         const standingArea = document.getElementById('standing-area');
         const titleElement = document.getElementById('seat-status-title');
-        if (!seatGrid || !standingArea || !titleElement) return;
+        
+        // ローディング関連の要素を取得
+        const loaderContainer = document.getElementById('loader-container');
+        const stage = document.querySelector('.stage');
+
+        if (!seatGrid || !standingArea || !titleElement || !loaderContainer || !stage) return;
         
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
         const fetchUrl = `${sheetUrl}&t=${new Date().getTime()}`;
@@ -567,6 +596,10 @@
             seatGrid.innerHTML = '';
             standingArea.innerHTML = '';
             
+            // データ取得成功時にローディングを非表示にし、座席表を表示
+            loaderContainer.style.display = 'none';
+            stage.style.display = 'block';
+            
             rows.forEach((row, index) => {
                 const columns = row.replace(/\r/g, '').split(',');
                 const seatId = columns[0]?.trim();
@@ -574,7 +607,7 @@
                 if (!seatId) return;
 
                 const rawStatus = columns[targetPerformance.columnIndex];
-                const status = rawStatus ? rawStatus.trim() : ''; 
+                const status = raw-Status ? rawStatus.trim() : ''; 
 
                 if (seatId === 'spacer') {
                     const spacer = document.createElement('div');
@@ -604,11 +637,14 @@
 
         } catch (error) {
             console.error('座席情報の取得でエラーが発生しました:', error);
-            document.querySelector('.seating-layout').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">座席情報の読み込みに失敗しました。ページを再読み込みしてください。</p>';
+            // エラー発生時もローディングを非表示にし、エラーメッセージを表示
+            loaderContainer.style.display = 'none';
+            const seatingLayout = document.querySelector('.seating-layout');
+            seatingLayout.innerHTML += '<p style="text-align: center; color: var(--text-secondary); padding: 20px 0;">座席情報の読み込みに失敗しました。<br>ページを再読み込みしてください。</p>';
         }
     };
     document.addEventListener('DOMContentLoaded', fetchSeatsFromSheet);
-
+    /* ▲▲▲ 座席取得の関数を大幅に変更 ▲▲▲ */
 </script>
 </body>
 </html>
