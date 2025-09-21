@@ -339,62 +339,50 @@
                 if (!response.ok) throw new Error(`シートの取得に失敗`);
 
                 const csvText = await response.text();
-                const rows = csvText.split('\n').slice(1);
+                // ★★★★★★★★★★★★★★★★★ 修正点 ★★★★★★★★★★★★★★★★★
+                // 目に見えない改行コード(\r)を削除してから行に分割する
+                const rows = csvText.replace(/\r/g, '').split('\n').slice(1);
+                // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
                 seatGrid.innerHTML = '';
                 standingArea.innerHTML = '';
                 
-                // ★★★★★★★★★★★★★ 変更点 ★★★★★★★★★★★★★
-                // 「立ち見」と「立ち見席」のどちらでも認識するように修正
-                const standingRowData = rows.find(row => {
-                    const seatId = row.split(',')[0].trim();
-                    return seatId === '立ち見' || seatId === '立ち見席';
-                });
-                const seatRowsData = rows.filter(row => {
-                    const seatId = row.split(',')[0].trim();
-                    return seatId !== '立ち見' && seatId !== '立ち見席';
-                });
-                // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-                
-                seatRowsData.forEach(row => {
+                rows.forEach(row => {
                     const columns = row.split(',');
-                    const seatId = columns[0];
+                    const seatId = columns[0]?.trim();
                     const status = columns[targetPerformance.columnIndex]?.trim();
 
                     if (!seatId) return;
 
-                    const seatEl = document.createElement('div');
-                    seatEl.className = 'seat';
+                    if (seatId === '立ち見') { // スプレッドシートの入力が「立ち見」であることを想定
+                        const standingBar = document.createElement('div');
+                        standingBar.className = 'standing-bar';
+                        
+                        const label = document.createElement('span');
+                        label.className = 'standing-bar-label';
+                        label.textContent = '立ち見席';
+                        
+                        const statusIcon = document.createElement('span');
+                        statusIcon.className = 'standing-bar-status';
 
-                    if (status === '○') seatEl.classList.add('is-available');
-                    else if (status === '×') seatEl.classList.add('is-reserved');
-                    
-                    seatGrid.appendChild(seatEl);
+                        standingBar.appendChild(label);
+                        standingBar.appendChild(statusIcon);
+                        
+                        if (status === '○') standingBar.classList.add('is-available');
+                        else if (status === '△') standingBar.classList.add('is-limited');
+                        else if (status === '×') standingBar.classList.add('is-reserved');
+                        
+                        standingArea.appendChild(standingBar);
+                    } else {
+                        const seatEl = document.createElement('div');
+                        seatEl.className = 'seat';
+
+                        if (status === '○') seatEl.classList.add('is-available');
+                        else if (status === '×') seatEl.classList.add('is-reserved');
+                        
+                        seatGrid.appendChild(seatEl);
+                    }
                 });
-
-                if (standingRowData) {
-                    const columns = standingRowData.split(',');
-                    const status = columns[targetPerformance.columnIndex]?.trim();
-                    
-                    const standingBar = document.createElement('div');
-                    standingBar.className = 'standing-bar';
-                    
-                    const label = document.createElement('span');
-                    label.className = 'standing-bar-label';
-                    label.textContent = '立ち見席';
-                    
-                    const statusIcon = document.createElement('span');
-                    statusIcon.className = 'standing-bar-status';
-
-                    standingBar.appendChild(label);
-                    standingBar.appendChild(statusIcon);
-                    
-                    if (status === '○') standingBar.classList.add('is-available');
-                    else if (status === '△') standingBar.classList.add('is-limited');
-                    else if (status === '×') standingBar.classList.add('is-reserved');
-                    
-                    standingArea.appendChild(standingBar);
-                }
 
             } catch (error) {
                 console.error('座席情報の取得エラー:', error);
