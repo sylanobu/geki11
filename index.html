@@ -570,15 +570,11 @@
 
         if (!seatGrid || !standingArea || !titleElement || !loaderContainer || !stage) return;
         
-        // ▼▼▼ ここから修正 ▼▼▼
-
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
         
         // キャッシュを回避するために、URLの末尾に現在時刻を追加
         const fetchUrl = `${sheetUrl}&t=${new Date().getTime()}`;
         
-        // ▲▲▲ ここまで修正 ▲▲▲
-
         const performances = [
             { name: '第1回', startTime: '9/27 10:50', endTime: '9/27 11:30', columnIndex: 1 },
             { name: '第2回', startTime: '9/27 12:40', endTime: '9/27 13:20', columnIndex: 2 },
@@ -604,7 +600,9 @@
         if (!targetPerformance) { targetPerformance = performances[performances.length - 1]; }
         
         try {
-            titleElement.textContent = `${targetPerformance.name}公演 座席状況`;
+            // ▼▼▼ ここから修正 ▼▼▼
+            titleElement.innerHTML = `${targetPerformance.name}公演<br>座席状況`;
+            // ▲▲▲ ここまで修正 ▲▲▲
             const response = await fetch(fetchUrl);
             if (!response.ok) throw new Error(`シートの取得に失敗しました。HTTPステータス: ${response.status}`);
 
