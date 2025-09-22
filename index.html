@@ -36,7 +36,7 @@
         html { scroll-behavior: smooth; }
 
         body {
-            /* デフォルトフォントを明朝体に設定 */
+            /* ▼ ページ全体のフォントを明朝体に変更 */
             font-family: var(--font-serif);
             color: var(--text-light);
             background: var(--background-dark);
@@ -125,14 +125,13 @@
         .hero-title-line { overflow: hidden; padding: 0 0.5em; }
         .hero h1 { font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; transform: translateY(110%) translateX(0.5em); }
         .hero-subtitle { font-size: 1.2rem; color: var(--text-secondary); margin-top: 24px; max-width: 60ch; margin-left: auto; margin-right: auto; padding: 0 24px; }
-        
-        /* SCROLLテキストのみゴシック体を指定 */
         .scroll-indicator { 
             position: absolute; 
             bottom: 40px; 
             font-size: 0.8rem; 
             letter-spacing: 0.1em; 
-            color: var(--text-secondary); 
+            color: var(--text-secondary);
+            /* ▼ SCROLLのみゴシック体に戻す */
             font-family: var(--font-sans);
         }
 
@@ -328,7 +327,7 @@
                 transform: translateY(20px);
                 transition: opacity 0.4s ease, transform 0.4s ease;
             }
-          - 
+            
             .nav-links.is-open a {
                 opacity: 1;
                 transform: translateY(0);
@@ -409,16 +408,16 @@
                             <div class="play-card-content">
                                 <h3>銭天堂<br>開運ウォーター</h3>
                                 <p>飲むだけで幸運になれるという不思議な水を手に入れるが――。</p>
-                      _SESSION_ID      <span class="details-link">詳細を見る &rarr;</span>
+                                <span class="details-link">詳細を見る &rarr;</span>
                             </div>
                         </div>
                         <div class="play-card" data-title="お返しはマシュマロ" data-synopsis="完璧な生徒会長・遠坂拓也は、バレンタインに女子からたくさんチョコをもらう人気者。副会長の青野香奈子からも貰ったが、お返しとしてマシュマロを渡してしまい――。">
                             <div class="spotlight"></div>
                             <div class="play-card-content">
-                                <h3>お返しは<br>マシュマロ</h3>
+                              <h3>お返しは<br>マシュマロ</h3>
                                 <p>完璧な生徒会長が渡したマシュマロの意味とは――。</p>
                                 <span class="details-link">詳細を見る &rarr;</span>
-                            </div>
+                          </div>
                         </div>
                     </div>
                 </div>
