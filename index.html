@@ -488,7 +488,7 @@
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
-    const numParticles = 100;
+    const numParticles = 50;
     const resizeCanvas = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     class Particle {
         constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.radius = Math.random() * 1.5; }
