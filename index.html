@@ -36,7 +36,9 @@
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: var(--font-sans);
+            /* ▼▼▼ フォントを明朝体に変更しました ▼▼▼ */
+            font-family: var(--font-serif);
+            /* ▲▲▲ フォントを明朝体に変更しました ▲▲▲ */
             color: var(--text-light);
             background: var(--background-dark);
             -webkit-font-smoothing: antialiased;
@@ -124,7 +126,17 @@
         .hero-title-line { overflow: hidden; padding: 0 0.5em; }
         .hero h1 { font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; transform: translateY(110%) translateX(0.5em); }
         .hero-subtitle { font-size: 1.2rem; color: var(--text-secondary); margin-top: 24px; max-width: 60ch; margin-left: auto; margin-right: auto; padding: 0 24px; }
-        .scroll-indicator { position: absolute; bottom: 40px; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-secondary); }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            /* ▼▼▼ ゴシック体を指定しました ▼▼▼ */
+            font-family: var(--font-sans);
+            /* ▲▲▲ ゴシック体を指定しました ▲▲▲ */
+        }
 
         .section { padding: 150px 0; }
         .section-header { text-align: center; margin-bottom: 80px; }
