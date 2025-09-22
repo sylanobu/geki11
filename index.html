@@ -568,8 +568,14 @@
 
         if (!seatGrid || !standingArea || !titleElement || !loaderContainer || !stage) return;
         
+        // ▼▼▼ ここから修正 ▼▼▼
+
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRwRKsPG_bU2guIlBXZw3B6cO0_Gx9ecNfCxlWo8mSNzPKZxaejy4DdHixIsJ16gOjstIeR7UwpBxhj/pub?output=csv';
+        
+        // キャッシュを回避するために、URLの末尾に現在時刻を追加
         const fetchUrl = `${sheetUrl}&t=${new Date().getTime()}`;
+        
+        // ▲▲▲ ここまで修正 ▲▲▲
 
         const performances = [
             { name: '第1回', startTime: '9/27 10:50', endTime: '9/27 11:30', columnIndex: 1 },
@@ -616,10 +622,7 @@
                 if (!seatId) return;
 
                 const rawStatus = columns[targetPerformance.columnIndex];
-                
-                /* ▼▼▼ ここのタイプミスを修正しました ▼▼▼ */
                 const status = rawStatus ? rawStatus.trim() : ''; 
-                /* ▲▲▲ ここのタイプミスを修正しました ▲▲▲ */
 
                 if (seatId === 'spacer') {
                     const spacer = document.createElement('div');
