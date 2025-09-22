@@ -36,9 +36,8 @@
         html { scroll-behavior: smooth; }
 
         body {
-            /* ▼▼▼ デフォルトフォントを明朝体に変更 ▼▼▼ */
+            /* デフォルトフォントを明朝体に設定 */
             font-family: var(--font-serif);
-            /* ▲▲▲ デフォルトフォントを明朝体に変更 ▲▲▲ */
             color: var(--text-light);
             background: var(--background-dark);
             -webkit-font-smoothing: antialiased;
@@ -127,7 +126,7 @@
         .hero h1 { font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; transform: translateY(110%) translateX(0.5em); }
         .hero-subtitle { font-size: 1.2rem; color: var(--text-secondary); margin-top: 24px; max-width: 60ch; margin-left: auto; margin-right: auto; padding: 0 24px; }
         
-        /* ▼▼▼ SCROLLのみゴシック体を指定 ▼▼▼ */
+        /* SCROLLテキストのみゴシック体を指定 */
         .scroll-indicator { 
             position: absolute; 
             bottom: 40px; 
@@ -136,7 +135,6 @@
             color: var(--text-secondary); 
             font-family: var(--font-sans);
         }
-        /* ▲▲▲ SCROLLのみゴシック体を指定 ▲▲▲ */
 
         .section { padding: 150px 0; }
         .section-header { text-align: center; margin-bottom: 80px; }
@@ -276,7 +274,6 @@
             color: var(--text-secondary);
         }
         
-        /* ▼▼▼ ローディング表示のスタイルを追加 ▼▼▼ */
         .loader-container {
             padding: 60px 0;
             text-align: center;
@@ -296,7 +293,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* ▲▲▲ ローディング表示のスタイルを追加 ▲▲▲ */
 
         @media (max-width: 768px) {
             .hamburger-btn {
@@ -332,7 +328,7 @@
                 transform: translateY(20px);
                 transition: opacity 0.4s ease, transform 0.4s ease;
             }
-            
+          - 
             .nav-links.is-open a {
                 opacity: 1;
                 transform: translateY(0);
@@ -413,7 +409,7 @@
                             <div class="play-card-content">
                                 <h3>銭天堂<br>開運ウォーター</h3>
                                 <p>飲むだけで幸運になれるという不思議な水を手に入れるが――。</p>
-                                <span class="details-link">詳細を見る &rarr;</span>
+                      _SESSION_ID      <span class="details-link">詳細を見る &rarr;</span>
                             </div>
                         </div>
                         <div class="play-card" data-title="お返しはマシュマロ" data-synopsis="完璧な生徒会長・遠坂拓也は、バレンタインに女子からたくさんチョコをもらう人気者。副会長の青野香奈子からも貰ったが、お返しとしてマシュマロを渡してしまい――。">
@@ -558,13 +554,11 @@
         });
     }
 
-    /* ▼▼▼ 座席取得の関数を大幅に変更 ▼▼▼ */
     const fetchSeatsFromSheet = async () => {
         const seatGrid = document.getElementById('seat-grid');
         const standingArea = document.getElementById('standing-area');
         const titleElement = document.getElementById('seat-status-title');
         
-        // ローディング関連の要素を取得
         const loaderContainer = document.getElementById('loader-container');
         const stage = document.querySelector('.stage');
 
@@ -608,7 +602,6 @@
             seatGrid.innerHTML = '';
             standingArea.innerHTML = '';
             
-            // データ取得成功時にローディングを非表示にし、座席表を表示
             loaderContainer.style.display = 'none';
             stage.style.display = 'block';
             
@@ -632,7 +625,7 @@
                     
                     if (status.includes('○')) standingBar.classList.add('is-available');
                     else if (status.includes('△')) standingBar.classList.add('is-limited');
-    _SESSION_ID            else if (status.includes('×')) standingBar.classList.add('is-reserved');
+                    else if (status.includes('×')) standingBar.classList.add('is-reserved');
                     
                     standingArea.appendChild(standingBar);
                 } else {
@@ -649,14 +642,12 @@
 
         } catch (error) {
             console.error('座席情報の取得でエラーが発生しました:', error);
-            // エラー発生時もローディングを非表示にし、エラーメッセージを表示
             loaderContainer.style.display = 'none';
             const seatingLayout = document.querySelector('.seating-layout');
             seatingLayout.innerHTML += '<p style="text-align: center; color: var(--text-secondary); padding: 20px 0;">座席情報の読み込みに失敗しました。<br>ページを再読み込みしてください。</p>';
         }
     };
     document.addEventListener('DOMContentLoaded', fetchSeatsFromSheet);
-    /* ▲▲▲ 座席取得の関数を大幅に変更 ▲▲▲ */
 </script>
 </body>
 </html>
